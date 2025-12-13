@@ -1,18 +1,19 @@
-# Use official Python image
-FROM python:3.11-slim
+# Use official Python slim image
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and install
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies
+RUN pip install --no-cache-dir flask gunicorn
 
-# Copy app code
-COPY . .
+# Copy app files
+COPY app.py /app/
+COPY templates /app/templates
+COPY static /app/static
 
 # Expose port
-EXPOSE 5000
+EXPOSE 8080
 
-# Run the app
-CMD ["python", "app.py"]
+# Use Gunicorn to serve the Flask app
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app", "--workers", "4", "--threads", "2"]
