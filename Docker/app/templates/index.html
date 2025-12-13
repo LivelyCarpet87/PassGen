@@ -112,16 +112,16 @@
             <code>Adjective‑Noun‑Verb‑Noun‑NN</code>
           </li>
           <li>
-            <strong>Bank‑accepted (short) password</strong>:
+            <strong>Bank‑accepted (short) password</strong>: First two letters of each word, then <code>!</code>, and finally the 2‑digit number
             <ul class="list-disc pl-5 mt-1 space-y-1">
-              <li>First two letters of each word</li>
-              <li>Add <code>!</code> and the 2‑digit number</li>
               <li>
-                Meets common banking requirements:
-                uppercase, lowercase, symbol, and number
+                Meets common banking requirements: uppercase, lowercase, symbol, and number
               </li>
               <li>
                 Stays within 8–12 characters to satisfy typical bank password limits
+              </li>
+              <li>
+                Only uses symbols allowed by banks in passwords
               </li>
             </ul>
           </li>
@@ -133,6 +133,7 @@
     <p class="mt-6 text-sm text-gray-600">
       All generation happens <strong>locally in your browser</strong>.
       No words, passwords, or PINs are sent to any server.
+      Uses <code>crypto.getRandomValues</code> for better randomness.
     </p>
   </section>
 
