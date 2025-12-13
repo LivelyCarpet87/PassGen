@@ -9,8 +9,6 @@ RUN pip install --no-cache-dir flask gunicorn
 
 # Copy app files
 COPY app.py /app/
-COPY templates /app/templates
-COPY static /app/static
 
 # Expose port
 EXPOSE 8080
