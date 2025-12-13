@@ -65,7 +65,7 @@ def generate(adj_list, noun_list, verb_list):
     NN, PIN4, PIN6 = derive_numbers(words)
 
     # Long version
-    long_pw = f"{cap_words[0]}{cap_words[1]}{cap_words[2]}{cap_words[3]}-{NN}"
+    long_pw = f"{cap_words[0]}-{cap_words[1]}-{cap_words[2]}-{cap_words[3]}-{NN}"
 
     # Bank-accepted compact version
     short_pw = (

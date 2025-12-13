@@ -109,7 +109,7 @@ function secureRandomInt(max) {
 function computePasswords(words) {
     const capWords = words.map(w => w.charAt(0).toUpperCase() + w.slice(1));
     const { NN, PIN4, PIN6 } = deriveNumbers(words);
-    const long_pw = `${capWords[0]}${capWords[1]}${capWords[2]}${capWords[3]}-${NN}`;
+    const long_pw = `${capWords[0]}-${capWords[1]}-${capWords[2]}-${capWords[3]}-${NN}`;
     const short_pw = `${capWords[0].slice(0,2)}${capWords[1].slice(0,2)}${capWords[2].slice(0,2)}${capWords[3].slice(0,2)}!${NN}`;
     return { words: capWords, long_pw, short_pw, NN, PIN4, PIN6 };
 }
