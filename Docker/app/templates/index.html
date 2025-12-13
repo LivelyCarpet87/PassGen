@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Password Generator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4 sm:p-6 md:p-8">
+<div class="max-w-6xl mx-auto bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-lg grid gap-8">
+
+  <!-- Header -->
+  <header class="text-center">
+    <h1 class="text-3xl font-bold">Password Generator</h1>
+    <p class="mt-2 text-gray-600">Secure passwords generated locally in your browser</p>
+  </header>
+
+  <!-- Generate + Recover Sections: 2 columns on md+, 1 column on small screens -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+    <!-- Generate Section -->
+    <section class="flex flex-col items-center md:items-start bg-gray-50 p-4 rounded">
+      <h2 class="text-xl font-semibold mb-4">Generate Random Password Set</h2>
+      <button onclick="generate()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Generate</button>
+    </section>
+
+    <!-- Recover Section -->
+    <section class="flex flex-col items-center md:items-start bg-gray-50 p-4 rounded">
+      <h2 class="text-xl font-semibold mb-4">Recover from 4 Words</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full mb-2">
+        <input id="w1" placeholder="Adjective" class="border rounded p-2 w-full">
+        <input id="w2" placeholder="Noun1" class="border rounded p-2 w-full">
+        <input id="w3" placeholder="Verb" class="border rounded p-2 w-full">
+        <input id="w4" placeholder="Noun2" class="border rounded p-2 w-full">
+      </div>
+      <button onclick="recover()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Recover</button>
+    </section>
+  </div>
+
+  <!-- Result Section -->
+  <section class="bg-gray-50 p-4 rounded border flex flex-col md:flex-row md:justify-between items-center gap-4">
+    <pre id="result" class="whitespace-pre-wrap text-center md:text-left"></pre>
+    <button onclick="copyToClipboard()" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">Copy to Clipboard</button>
+  </section>
+
+  <!-- Explanation Section -->
+  <section class="bg-yellow-50 p-4 border-l-4 border-yellow-400 rounded">
+    <h2 class="text-xl font-semibold mb-2">How it Works</h2>
+    <p>Passwords are generated <strong>locally in your browser</strong> — nothing is sent to a server.</p>
+    <ul class="list-disc list-inside mt-2">
+      <li>4 words: adjective, noun, verb, noun.</li>
+      <li>First letter of each word is capitalized → mixes uppercase and lowercase.</li>
+      <li>Compute base number from first letters (A=1 … Z=26): <code>base = sum of first letters</code></li>
+      <li>Compute numbers from base:
+        <ul class="list-disc list-inside ml-4">
+          <li>2-digit: <code>NN = base % 100</code></li>
+          <li>4-digit PIN: <code>PIN4 = (base × 137) % 10000</code></li>
+          <li>6-digit PIN: <code>PIN6 = (base × 137 × 53) % 1000000</code></li>
+        </ul>
+      </li>
+      <li>Password versions:
+        <ul class="list-disc list-inside ml-4">
+          <li>Long mnemonic: words separated by dashes + 2-digit number</li>
+          <li>Bank-accepted (short): first 2 letters of each word + exclamation + 2-digit number (complies with bank rules: uppercase, lowercase, symbol, number)</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Credit Section -->
+  <section class="bg-gray-200 p-4 rounded text-sm text-gray-700">
+    <p>Wordlists from <a href="https://github.com/david47k/top-english-wordlists" target="_blank" class="text-blue-600 underline">top-english-wordlists</a></p> by @david47k on GitHub.
+  </section>
+
+</div>
+
+<script>
+let ADJ_LIST = [], NOUN_LIST = [], VERB_LIST = [];
+
+async function loadWordlist(path) {
+    const text = await fetch(path).then(r => r.text());
+    return text.split(/\r?\n/).map(w => w.trim().toLowerCase()).filter(Boolean);
+}
+
+Promise.all([
+    loadWordlist('/static/top_english_adjs_lower_10000.txt'),
+    loadWordlist('/static/top_english_nouns_lower_10000.txt'),
+    loadWordlist('/static/top_english_verbs_lower_10000.txt')
+]).then(([adj, noun, verb]) => {
+    ADJ_LIST = adj;
+    NOUN_LIST = noun;
+    VERB_LIST = verb;
+});
+
+function alphaIndex(ch) { return ch.toLowerCase().charCodeAt(0) - 96; }
+function deriveBase(words) { return words.reduce((sum, w) => sum + alphaIndex(w[0]), 0); }
+function deriveNumbers(words) {
+    const base = deriveBase(words);
+    const NN = String(base % 100).padStart(2, '0');
+    const PIN4 = String((base * 137) % 10000).padStart(4, '0');
+    const PIN6 = String((base * 137 * 53) % 1000000).padStart(6, '0');
+    return { NN, PIN4, PIN6 };
+}
+function computePasswords(words) {
+    const capWords = words.map(w => w.charAt(0).toUpperCase() + w.slice(1));
+    const { NN, PIN4, PIN6 } = deriveNumbers(words);
+    const long_pw = `${capWords[0]}-${capWords[1]}-${capWords[2]}-${capWords[3]}-${NN}`;
+    const short_pw = `${capWords[0].slice(0,2)}${capWords[1].slice(0,2)}${capWords[2].slice(0,2)}${capWords[3].slice(0,2)}!${NN}`;
+    return { words: capWords, long_pw, short_pw, NN, PIN4, PIN6 };
+}
+
+function generate() {
+    const adj = ADJ_LIST[Math.floor(Math.random()*ADJ_LIST.length)];
+    const noun1 = NOUN_LIST[Math.floor(Math.random()*NOUN_LIST.length)];
+    const verb = VERB_LIST[Math.floor(Math.random()*VERB_LIST.length)];
+    const noun2 = NOUN_LIST[Math.floor(Math.random()*NOUN_LIST.length)];
+    displayResult(computePasswords([adj, noun1, verb, noun2]));
+}
+
+function recover() {
+    const words = [
+        document.getElementById('w1').value.trim(),
+        document.getElementById('w2').value.trim(),
+        document.getElementById('w3').value.trim(),
+        document.getElementById('w4').value.trim()
+    ];
+    if(words.some(w => !w)) { document.getElementById('result').innerText = "Please enter all 4 words."; return; }
+    displayResult(computePasswords(words.map(w => w.toLowerCase())));
+}
+
+function displayResult(data) {
+    let text = `Words: ${data.words.join(', ')}\n`;
+    text += `Long mnemonic: ${data.long_pw}\n`;
+    text += `Bank-accepted: ${data.short_pw}\n`;
+    text += `2-digit number: ${data.NN}\n`;
+    text += `4-digit PIN: ${data.PIN4}\n`;
+    text += `6-digit PIN: ${data.PIN6}`;
+    document.getElementById('result').innerText = text;
+}
+
+function copyToClipboard() {
+    const text = document.getElementById('result').innerText;
+    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+}
+</script>
+</body>
+</html>
