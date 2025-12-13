@@ -100,6 +100,12 @@ function deriveNumbers(words) {
     const PIN6 = String((base * 137 * 53) % 1000000).padStart(6, '0');
     return { NN, PIN4, PIN6 };
 }
+function secureRandomInt(max) {
+    if (max <= 0) throw new Error("max must be > 0");
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    return array[0] % max;
+}
 function computePasswords(words) {
     const capWords = words.map(w => w.charAt(0).toUpperCase() + w.slice(1));
     const { NN, PIN4, PIN6 } = deriveNumbers(words);
@@ -107,13 +113,28 @@ function computePasswords(words) {
     const short_pw = `${capWords[0].slice(0,2)}${capWords[1].slice(0,2)}${capWords[2].slice(0,2)}${capWords[3].slice(0,2)}!${NN}`;
     return { words: capWords, long_pw, short_pw, NN, PIN4, PIN6 };
 }
-
 function generate() {
-    const adj = ADJ_LIST[Math.floor(Math.random()*ADJ_LIST.length)];
-    const noun1 = NOUN_LIST[Math.floor(Math.random()*NOUN_LIST.length)];
-    const verb = VERB_LIST[Math.floor(Math.random()*VERB_LIST.length)];
-    const noun2 = NOUN_LIST[Math.floor(Math.random()*NOUN_LIST.length)];
-    displayResult(computePasswords([adj, noun1, verb, noun2]));
+    if (!ADJ_LIST.length || !NOUN_LIST.length || !VERB_LIST.length) {
+        document.getElementById('result').innerText = "Wordlists not loaded yet.";
+        return;
+    }
+
+    const MAX_LEN = 30;
+    const MAX_ATTEMPTS = 100; // safety guard
+
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+        const adj   = ADJ_LIST[secureRandomInt(ADJ_LIST.length)];
+        const noun1 = NOUN_LIST[secureRandomInt(NOUN_LIST.length)];
+        const verb  = VERB_LIST[secureRandomInt(VERB_LIST.length)];
+        const noun2 = NOUN_LIST[secureRandomInt(NOUN_LIST.length)];
+
+        const result = computePasswords([adj, noun1, verb, noun2]);
+
+        if (result.long_pw.length <= MAX_LEN) {
+            displayResult(result);
+            return;
+        }
+    }
 }
 
 function recover() {
