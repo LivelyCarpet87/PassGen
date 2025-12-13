@@ -109,9 +109,16 @@ function secureRandomInt(max) {
 function computePasswords(words) {
     const capWords = words.map(w => w.charAt(0).toUpperCase() + w.slice(1));
     const { NN, PIN4, PIN6 } = deriveNumbers(words);
-    const long_pw = `${capWords[0]}-${capWords[1]}-${capWords[2]}-${capWords[3]}-${NN}`;
+    const long_pw = `${capWords[0]}${capWords[1]}${capWords[2]}${capWords[3]}-${NN}`;
     const short_pw = `${capWords[0].slice(0,2)}${capWords[1].slice(0,2)}${capWords[2].slice(0,2)}${capWords[3].slice(0,2)}!${NN}`;
     return { words: capWords, long_pw, short_pw, NN, PIN4, PIN6 };
+}
+function isValidWord(word) {
+    return (
+        typeof word === "string" &&
+        word.length >= 2 &&
+        /^[a-z]+$/i.test(word)
+    );
 }
 function generate() {
     if (!ADJ_LIST.length || !NOUN_LIST.length || !VERB_LIST.length) {
@@ -127,8 +134,12 @@ function generate() {
         const noun1 = NOUN_LIST[secureRandomInt(NOUN_LIST.length)];
         const verb  = VERB_LIST[secureRandomInt(VERB_LIST.length)];
         const noun2 = NOUN_LIST[secureRandomInt(NOUN_LIST.length)];
+        const words = [adj, noun1, verb, noun2];
+        if (!words.every(isValidWord)) {
+            continue; // reroll
+        }
 
-        const result = computePasswords([adj, noun1, verb, noun2]);
+        const result = computePasswords(words);
 
         if (result.long_pw.length <= MAX_LEN) {
             displayResult(result);
@@ -150,7 +161,7 @@ function recover() {
 
 function displayResult(data) {
     let text = `Words: ${data.words.join(', ')}\n`;
-    text += `Long mnemonic: ${data.long_pw}\n`;
+    text += `Long Password: ${data.long_pw}\n`;
     text += `Bank-accepted: ${data.short_pw}\n`;
     text += `2-digit number: ${data.NN}\n`;
     text += `4-digit PIN: ${data.PIN4}\n`;

@@ -65,7 +65,7 @@ def generate(adj_list, noun_list, verb_list):
     NN, PIN4, PIN6 = derive_numbers(words)
 
     # Long version
-    long_pw = f"{cap_words[0]}-{cap_words[1]}-{cap_words[2]}-{cap_words[3]}-{NN}"
+    long_pw = f"{cap_words[0]}{cap_words[1]}{cap_words[2]}{cap_words[3]}-{NN}"
 
     # Bank-accepted compact version
     short_pw = (
@@ -78,7 +78,7 @@ def generate(adj_list, noun_list, verb_list):
 
     print("=== Generated Password Set ===")
     print(f"Words:            {', '.join(cap_words)}")
-    print(f"Long mnemonic:    {long_pw}")
+    print(f"Long password:    {long_pw}")
     print(f"Bank-accepted:        {short_pw}")
     print(f"4-digit PIN:      {PIN4}")
     print(f"6-digit PIN:      {PIN6}")
@@ -105,7 +105,7 @@ def recover(words):
 
     print("=== Recovered Password Set ===")
     print(f"Words:            {', '.join(cap_words)}")
-    print(f"Long mnemonic:    {long_pw}")
+    print(f"Long password:    {long_pw}")
     print(f"Bank-accepted:        {short_pw}")
     print(f"2-digit number:   {NN}")
     print(f"4-digit PIN:      {PIN4}")
