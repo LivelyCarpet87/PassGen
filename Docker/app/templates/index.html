@@ -48,30 +48,99 @@
   <!-- Explanation Section -->
   <section class="bg-yellow-50 p-4 border-l-4 border-yellow-400 rounded">
     <h2 class="text-xl font-semibold mb-2">How it Works</h2>
-    <p>Passwords are generated <strong>locally in your browser</strong> — nothing is sent to a server.</p>
-    <ul class="list-disc list-inside mt-2">
-      <li>4 words: adjective, noun, verb, noun.</li>
-      <li>First letter of each word is capitalized → mixes uppercase and lowercase.</li>
-      <li>Compute base number from first letters (A=1 … Z=26): <code>base = sum of first letters</code></li>
-      <li>Compute numbers from base:
-        <ul class="list-disc list-inside ml-4">
-          <li>2-digit: <code>NN = base % 100</code></li>
-          <li>4-digit PIN: <code>PIN4 = (base × 137) % 10000</code></li>
-          <li>6-digit PIN: <code>PIN6 = (base × 137 × 53) % 1000000</code></li>
+    <section class="bg-white p-6 rounded-lg shadow-md my-6">
+    <ol class="list-decimal pl-5 space-y-4">
+      <li>
+        <strong>Randomly generate four words</strong>:
+        adjective, noun, verb, noun.
+        <p class="text-sm text-gray-600 mt-1">
+          Words are automatically rerolled if any word is shorter than 3 characters
+          or if the final long password exceeds 30 characters.
+        </p>
+      </li>
+
+      <li>
+        <strong>Capitalize the first letter</strong> of each word.
+        <p class="text-sm text-gray-600 mt-1">
+          This guarantees a mix of uppercase and lowercase letters.
+        </p>
+      </li>
+
+      <li>
+        <strong>Compute a base number</strong> from the four words:
+        <ul class="list-disc pl-5 mt-2 space-y-1">
+          <li>
+            Take the <strong>first three letters</strong> of each word and convert them to numbers
+            (A = 1 … Z = 26)
+          </li>
+          <li>
+            For <strong>each word</strong>:
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li>Add the three letter values together</li>
+              <li>Multiply the sum by the <strong>word length</strong></li>
+              <li>
+                Multiply again by a <strong>prime weight</strong>
+                (the first prime of that digit length ending in 7):
+                <ul class="list-disc pl-5 mt-1">
+                  <li>1st word (adjective): 7</li>
+                  <li>2nd word (noun): 17</li>
+                  <li>3rd word (verb): 107</li>
+                  <li>4th word (noun): 1087</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            Add all four results together to produce the <strong>base number</strong>
+          </li>
         </ul>
       </li>
-      <li>Password versions:
-        <ul class="list-disc list-inside ml-4">
-          <li>Long mnemonic: words separated by dashes + 2-digit number</li>
-          <li>Bank-accepted (short): first 2 letters of each word + exclamation + 2-digit number (complies with bank rules: uppercase, lowercase, symbol, number)</li>
+
+      <li>
+        <strong>Derive numeric PINs</strong> from the base number:
+        <ul class="list-disc pl-5 mt-2 space-y-1">
+          <li>2‑digit number: <code>NN = base mod 100</code></li>
+          <li>4‑digit PIN: <code>PIN4 = base mod 10000</code></li>
+          <li>6‑digit PIN: <code>PIN6 = base mod 1000000</code></li>
         </ul>
       </li>
-    </ul>
+
+      <li>
+        <strong>Create two password formats</strong>:
+        <ul class="list-disc pl-5 mt-2 space-y-2">
+          <li>
+            <strong>Long password</strong>:
+            <code>Adjective‑Noun‑Verb‑Noun‑NN</code>
+          </li>
+          <li>
+            <strong>Bank‑accepted (short) password</strong>:
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li>First two letters of each word</li>
+              <li>Add <code>!</code> and the 2‑digit number</li>
+              <li>
+                Meets common banking requirements:
+                uppercase, lowercase, symbol, and number
+              </li>
+              <li>
+                Stays within 8–12 characters to satisfy typical bank password limits
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+    </ol>
+
+    <p class="mt-6 text-sm text-gray-600">
+      All generation happens <strong>locally in your browser</strong>.
+      No words, passwords, or PINs are sent to any server.
+    </p>
   </section>
 
   <!-- Credit Section -->
   <section class="bg-gray-200 p-4 rounded text-sm text-gray-700">
-    <p>Wordlists from <a href="https://github.com/david47k/top-english-wordlists" target="_blank" class="text-blue-600 underline">top-english-wordlists</a></p> by @david47k on GitHub.
+    <p>Wordlists from <a href="https://github.com/david47k/top-english-wordlists" target="_blank" class="text-blue-600 underline">top-english-wordlists</a> by @david47k on GitHub.</p>
+    <p>Base format derived from <a href=https://xkcd.com/936" target="_blank" class="text-blue-600 underline">XKCD</a>.</p>
   </section>
 
 </div>
@@ -95,12 +164,17 @@ Promise.all([
 });
 
 function alphaIndex(ch) { return ch.toLowerCase().charCodeAt(0) - 96; }
-function deriveBase(words) { return words.reduce((sum, w) => sum + alphaIndex(w[0]), 0); }
+function deriveBase(words) {
+    return (alphaIndex(words[0][0])+alphaIndex(words[0][1])+alphaIndex(words[0][2]))*words[0].length*7
+    + (alphaIndex(words[1][0])+alphaIndex(words[1][1])+alphaIndex(words[1][2]))*words[1].length*17
+    + (alphaIndex(words[2][0])+alphaIndex(words[2][1])+alphaIndex(words[2][2]))*words[2].length*107
+    + (alphaIndex(words[3][0])+alphaIndex(words[3][1])+alphaIndex(words[3][2]))*words[3].length*1087;
+}
 function deriveNumbers(words) {
     const base = deriveBase(words);
     const NN = String(base % 100).padStart(2, '0');
-    const PIN4 = String((base * 137) % 10000).padStart(4, '0');
-    const PIN6 = String((base * 137 * 53) % 1000000).padStart(6, '0');
+    const PIN4 = String(base % 10000).padStart(4, '0');
+    const PIN6 = String(base % 1000000).padStart(6, '0');
     return { NN, PIN4, PIN6 };
 }
 function secureRandomInt(max) {
@@ -119,7 +193,7 @@ function computePasswords(words) {
 function isValidWord(word) {
     return (
         typeof word === "string" &&
-        word.length >= 2 &&
+        word.length >= 3 &&
         /^[a-z]+$/i.test(word)
     );
 }

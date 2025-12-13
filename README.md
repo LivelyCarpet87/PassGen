@@ -15,25 +15,32 @@ This project generates secure passwords and PINs from four words (adjective, nou
 
 ---
 
-## How It Works (Browser Version)
+## How It Works
 
-1. **Select or generate 4 words**: adjective, noun, verb, noun.
+1. **RANDOMLY generate 4 words**: adjective, noun, verb, noun. (These will be rerolled if any word is less than 3 characters or the long password is more than 30 characters)
 2. **Capitalize the first letter** of each word → ensures mixed uppercase and lowercase letters.
-3. **Compute a base number** from the first letters of the words: `base = sum of first letters (A=1, B=2, ..., Z=26)`
-4. **Derive numeric codes from base**:
-
-- 2-digit number: `NN = base % 100`
-- 4-digit PIN: `PIN4 = (base × 137) % 10000`
-- 6-digit PIN: `PIN6 = (base × 137 × 53) % 1000000`
+3. **Compute a base number**:
+  - Take the **first three letters** of each word and convert to numbers (A=1 … Z=26)
+  - For EACH word:
+    - Add the 3 numbers together
+    - Multiply sum by the **word length**
+    - Multiply again by a **prime weight** for each word (first prime of that digit length ending in 7):
+      - 1st word (adjective) → 7
+      - 2nd word (noun) → 17
+      - 3rd word (verb) → 107
+      - 4th word (noun) → 1087
+  - **Add the results for each word together** to produce the **base number**
+- Derive PINs from the base number:
+  - 2-digit number: `NN = base mod 100`
+  - 4-digit PIN: `PIN4 = base mod 10000`
+  - 6-digit PIN: `PIN6 = base mod 1000000`
 
 5. **Password versions**:
 
-- **Long mnemonic**: `Word1-Word2-Word3-Word4-NN`
+- **Long Password**: `Adjective-Noun1-Verb-Noun2-NN`
 - **Bank-accepted (short)**: first 2 letters of each word + `!` + `NN`
   - Ensures compliance with most banking password rules: uppercase, lowercase, symbol, number.
-
-6. **Browser-based generation** ensures **security and privacy** because everything runs locally.
-
+  - Within 8-12 characters to satify all bank password length requirements
 ---
 
 ## Docker Quick Start

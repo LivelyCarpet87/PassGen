@@ -36,15 +36,18 @@ def alpha_index(ch):
 
 def derive_base(words):
     """Base number derived from the 1st letters of all 4 words."""
-    return sum(alpha_index(w[0]) for w in words)
+    base = 0
+    for i in range(4):
+        base += (alpha_index(words[i][0])+alpha_index(words[i][1])+alpha_index(words[i][2]))*len(words[i])*[7,17,107,1087][i]
+    return base
 
 
 def derive_numbers(words):
     base = derive_base(words)
 
     NN    = f"{base % 100:02d}"
-    PIN4  = f"{(base * 137) % 10000:04d}"
-    PIN6  = f"{(base * 137 * 53) % 1000000:06d}"
+    PIN4  = f"{base % 10000:04d}"
+    PIN6  = f"{base % 1000000:06d}"
 
     return NN, PIN4, PIN6
 
@@ -54,12 +57,17 @@ def derive_numbers(words):
 # -------------------------------
 
 def generate(adj_list, noun_list, verb_list):
-    adj   = secrets.choice(adj_list)
-    noun1 = secrets.choice(noun_list)
-    verb  = secrets.choice(verb_list)
-    noun2 = secrets.choice(noun_list)
+    while True:
+        adj   = secrets.choice(adj_list)
+        noun1 = secrets.choice(noun_list)
+        verb  = secrets.choice(verb_list)
+        noun2 = secrets.choice(noun_list)
 
-    words = [adj, noun1, verb, noun2]
+        words = [adj, noun1, verb, noun2]
+        if len([w for w in words if len(w) < 3 or not w.isascii()])>0:
+            continue
+        else:
+            break
     cap_words = [w.capitalize() for w in words]
 
     NN, PIN4, PIN6 = derive_numbers(words)
