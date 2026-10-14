@@ -7,9 +7,6 @@ WORKDIR /app
 # Install dependencies
 RUN pip install --no-cache-dir flask gunicorn
 
-# Copy app files
-COPY ./app /app/
-
 # Expose port
 EXPOSE 8080
 
