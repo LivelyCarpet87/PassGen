@@ -38,7 +38,8 @@ def derive_base(words):
     """Base number derived from the 1st letters of all 4 words."""
     base = 0
     for i in range(4):
-        base += (alpha_index(words[i][0])+alpha_index(words[i][1])+alpha_index(words[i][2]))*len(words[i])*[7,17,107,1087][i]
+        base += (alpha_index(words[i][0])+alpha_index(words[i][1])+alpha_index(words[i][2]))*len(words[i])*[17,107,1087,10007][i]
+    base += len(''.join(words)) * 100057
     return base
 
 
@@ -128,12 +129,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Generate or recover deterministic passwords & PINs from 4 words (adj, noun, verb, noun)."
     )
+    generate_args = parser.add_argument_group(title="Generate Password", description="Generate a password from user-provided wordlists.")
+    generate_args.add_argument("--adjectives", help="Adjective wordlist")
+    generate_args.add_argument("--nouns", help="Noun wordlist")
+    generate_args.add_argument("--verbs", help="Verb wordlist")
 
-    parser.add_argument("--adjectives", required=True, help="Adjective wordlist")
-    parser.add_argument("--nouns",     required=True, help="Noun wordlist")
-    parser.add_argument("--verbs",      required=True, help="Verb wordlist")
-
-    parser.add_argument(
+    recover_args = parser.add_argument_group(title="Recover Password", description="Recover a password from user-provided words.")
+    recover_args.add_argument(
         "--recover",
         nargs=4,
         metavar=("ADJ", "NOUN1", "VERB", "NOUN2"),
@@ -142,11 +144,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    adj_list   = load_wordlist(args.adjectives)
-    noun_list = load_wordlist(args.nouns)
-    verb_list  = load_wordlist(args.verbs)
-
     if args.recover:
         recover(args.recover)
-    else:
+    elif args.adjectives and args.nouns and args.verbs:
+        adj_list   = load_wordlist(args.adjectives)
+        noun_list = load_wordlist(args.nouns)
+        verb_list  = load_wordlist(args.verbs)
         generate(adj_list, noun_list, verb_list)
+    else:
+        parser.print_help()
