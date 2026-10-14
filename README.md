@@ -1,5 +1,5 @@
  
-# Password Generator
+# XKPW Password Generator
 
 This project generates secure passwords and PINs from four words (adjective, noun, verb, noun). See [XKCD](https://xkcd.com/936/). The major improvement is that the passwords generated can now also align with archaic banking password rules, most notably being less than 12 characters and within the restricted selection of special characters. Why banks passwords have length limits and ban meaningful special characters is left as a ponderance to the reader.
 
