@@ -44,11 +44,20 @@ This project generates secure passwords and PINs from four words (adjective, nou
 ---
 
 ## Docker Quick Start
+
+### Using Docker Compose (Recommended)
+```
+docker-compose up --build
+```
+
+### Using Docker CLI
 ```
 cd Docker
 docker build -t password-generator .
 docker run -d -p 8080:8080 password-generator
 ```
+
+The service will be available at `http://localhost:8080`
 
 ## CLI Script
 
