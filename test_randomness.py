@@ -5,7 +5,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 
 
-SAMPLES = 100_000
+SAMPLES = 1000_000
 
 random.seed(12345)
 
@@ -38,11 +38,11 @@ def word_score(word):
 
 
 def candidate_pin(words):
-    weights = [7, 17, 107, 1087]
+    word_weights = [17, 107, 1087, 10007]
     total = sum(
         weight * word_score(word)
-        for weight, word in zip(weights, words)
-    )
+        for weight, word in zip(word_weights, words)
+    ) + len(''.join(words))*100057
     return f"{total % 1_000_000:06d}"
 
 
@@ -97,15 +97,17 @@ def plot_pin_spread(pins):
     plt.show()
 
 def choose_four_words():
-    words = []
-    for lst in [ADJS,NOUNS,VERBS,NOUNS]:
-        while True:
-            word = random.choice(lst)
-            if len(word) < 3 or not word.isalpha():
-                continue
-            words.append(word)
-            break
-    return words
+    while True:
+        words = []
+        for lst in [ADJS,NOUNS,VERBS,NOUNS]:
+            while True:
+                word = random.choice(lst)
+                if len(word) < 3 or not word.isalpha():
+                    continue
+                words.append(word)
+                break
+        if len(''.join(words))<32-4:
+            return words
 
 def main():
 

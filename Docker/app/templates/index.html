@@ -81,17 +81,21 @@
                 Multiply again by a <strong>prime weight</strong>
                 (the first prime of that digit length ending in 7):
                 <ul class="list-disc pl-5 mt-1">
-                  <li>1st word (adjective): 7</li>
-                  <li>2nd word (noun): 17</li>
-                  <li>3rd word (verb): 107</li>
-                  <li>4th word (noun): 1087</li>
+                  <li>1st word (adjective): 17</li>
+                  <li>2nd word (noun): 107</li>
+                  <li>3rd word (verb): 1087</li>
+                  <li>4th word (noun): 10007</li>
                 </ul>
               </li>
             </ul>
           </li>
           <li>
-            Add all four results together to produce the <strong>base number</strong>
+            Take the <strong>sum of the total word lengths</strong> of the four words and multiply it by 100057
           </li>
+          <li>
+            Add all five results together to produce the <strong>base number</strong>
+          </li>
+          <li>Tip: All the weights are the first prime number of each magnitude ending with a 7</li>
         </ul>
       </li>
 
@@ -165,10 +169,11 @@ Promise.all([
 
 function alphaIndex(ch) { return ch.toLowerCase().charCodeAt(0) - 96; }
 function deriveBase(words) {
-    return (alphaIndex(words[0][0])+alphaIndex(words[0][1])+alphaIndex(words[0][2]))*words[0].length*7
-    + (alphaIndex(words[1][0])+alphaIndex(words[1][1])+alphaIndex(words[1][2]))*words[1].length*17
-    + (alphaIndex(words[2][0])+alphaIndex(words[2][1])+alphaIndex(words[2][2]))*words[2].length*107
-    + (alphaIndex(words[3][0])+alphaIndex(words[3][1])+alphaIndex(words[3][2]))*words[3].length*1087;
+    return (alphaIndex(words[0][0])+alphaIndex(words[0][1])+alphaIndex(words[0][2]))*words[0].length*17
+    + (alphaIndex(words[1][0])+alphaIndex(words[1][1])+alphaIndex(words[1][2]))*words[1].length*107
+    + (alphaIndex(words[2][0])+alphaIndex(words[2][1])+alphaIndex(words[2][2]))*words[2].length*1087
+    + (alphaIndex(words[3][0])+alphaIndex(words[3][1])+alphaIndex(words[3][2]))*words[3].length*10007
+    + words.reduce((total, word) => total + word.length, 0)*100057;
 }
 function deriveNumbers(words) {
     const base = deriveBase(words);
